@@ -1,6 +1,9 @@
 package gj.quoridor.player.scaringella;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import gj.quoridor.player.Player;
@@ -14,6 +17,24 @@ public class ScaringellaPlayer implements Player {
 	private Node enemy;
 	private boolean red;
 
+	private List<Move> moves;
+	private List<Move> availableMoves;
+	
+	public void updateAvailableMoves() {
+		//da implementare il controllo che non faccia spostamenti sbagliati
+		
+		availableMoves=new ArrayList<>();
+		availableMoves.add(new Move(1));
+		availableMoves.add(new Move(-1));
+		availableMoves.add(new Move(2));
+		availableMoves.add(new Move(-2));
+	}
+	
+	public void scegliRandom(/*in teoria gli dovrei passare le availablemoves ma per ora siamo nella stessa classe*/) {
+		Random random=new Random();
+		availableMoves.get(random.nextInt(4)).updatePlayerMovement(board, me);
+	}
+	
 	private int aviableWall;
 	private Set<Integer> walls;
 

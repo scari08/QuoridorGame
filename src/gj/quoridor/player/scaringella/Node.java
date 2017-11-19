@@ -46,6 +46,14 @@ public class Node {
 		return neighbors;
 	}
 
+	public void setR(int r) {
+		this.r = r;
+	}
+
+	public void setC(int c) {
+		this.c = c;
+	}
+
 	public int getR() {
 		return r;
 	}

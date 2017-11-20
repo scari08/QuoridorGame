@@ -21,18 +21,41 @@ public class ScaringellaPlayer implements Player {
 	private List<Move> availableMoves;
 	
 	public void updateAvailableMoves() {
-		//da implementare il controllo che non faccia spostamenti sbagliati
 		
+		
+		//da implementare il controllo che non faccia spostamenti sbagliati
+		//a dire il vero ora basta che me segua i neighbor
+		
+		if(me.getNeighbors().size()==4) {
 		availableMoves=new ArrayList<>();
 		availableMoves.add(new Move(1));
 		availableMoves.add(new Move(-1));
 		availableMoves.add(new Move(2));
 		availableMoves.add(new Move(-2));
+		return;
+		}
+		for (Node i : me.getNeighbors()) {
+			if(i.getR()==me.getR()) {//significa che può spostarsi destra/sinistra
+				//se sono rosso e il mio vicino ha +1 c allora posso andare a sinistra
+				availableMoves.add(new Move((i.getC()-me.getC())*2));//simple calcus credo che sta cosa funzioni indipendentemente da rosso blu boh magari funziona
+				
+			}
+			if(i.getC()==me.getC()) {
+				availableMoves.add(new Move((i.getR()-me.getR())));
+			}
+		}
+		
 	}
 	
 	public void scegliRandom(/*in teoria gli dovrei passare le availablemoves ma per ora siamo nella stessa classe*/) {
 		Random random=new Random();
-		availableMoves.get(random.nextInt(4)).updatePlayerMovement(board, me);
+		availableMoves.get(random.nextInt(availableMoves.size())).updatePlayerMovement(board, me);
+	}
+	
+	public void enemyWall(int ind) {
+		//se nemico piazza muro devo togliere alcuni neighbor e togliere alcune posizioni di muri
+		
+		
 	}
 	
 	private int aviableWall;

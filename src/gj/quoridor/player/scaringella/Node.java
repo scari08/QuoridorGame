@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Node {
 	
-	private int r,c;
+	private final int r,c;
 	private ArrayList<Node> neighbors;
 	
 	public Node(int r,int c) {
@@ -44,14 +44,6 @@ public class Node {
 
 	public ArrayList<Node> getNeighbors() {
 		return neighbors;
-	}
-
-	public void setR(int r) {
-		this.r = r;
-	}
-
-	public void setC(int c) {
-		this.c = c;
 	}
 
 	public int getR() {

@@ -1,10 +1,8 @@
 package gj.quoridor.player.scaringella;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import gj.quoridor.player.Player;
 
@@ -17,49 +15,56 @@ public class ScaringellaPlayer implements Player {
 	private Node enemy;
 	private boolean red;
 
-	private List<Move> moves;
-	private List<Move> availableMoves;
-	
-	public void updateAvailableMoves() {
-		
-		
-		//da implementare il controllo che non faccia spostamenti sbagliati
-		//a dire il vero ora basta che me segua i neighbor
-		
-		if(me.getNeighbors().size()==4) {
-		availableMoves=new ArrayList<>();
-		availableMoves.add(new Move(1));
-		availableMoves.add(new Move(-1));
-		availableMoves.add(new Move(2));
-		availableMoves.add(new Move(-2));
-		return;
-		}
-		for (Node i : me.getNeighbors()) {
-			if(i.getR()==me.getR()) {//significa che può spostarsi destra/sinistra
-				//se sono rosso e il mio vicino ha +1 c allora posso andare a sinistra
-				availableMoves.add(new Move((i.getC()-me.getC())*2));//simple calcus credo che sta cosa funzioni indipendentemente da rosso blu boh magari funziona
-				
-			}
-			if(i.getC()==me.getC()) {
-				availableMoves.add(new Move((i.getR()-me.getR())));
-			}
-		}
-		
-	}
-	
-	public void scegliRandom(/*in teoria gli dovrei passare le availablemoves ma per ora siamo nella stessa classe*/) {
-		Random random=new Random();
-		availableMoves.get(random.nextInt(availableMoves.size())).updatePlayerMovement(board, me);
-	}
-	
-	public void enemyWall(int ind) {
-		//se nemico piazza muro devo togliere alcuni neighbor e togliere alcune posizioni di muri
-		
-		
-	}
-	
-	private int aviableWall;
+	private int[][] allDirection = new int[][] { { 1, -1, 1, -1 }, { -1, 1, -1, 1 } }; // il primo array è il rosso
+
+	private int availableWall;
 	private Set<Integer> walls;
+
+	// private List<Move> moves;
+	// private List<Move> availableMoves;
+
+	// public void updateAvailableMoves() {
+	//
+	//
+	// //da implementare il controllo che non faccia spostamenti sbagliati
+	// //a dire il vero ora basta che me segua i neighbor
+	//
+	// if(me.getNeighbors().size()==4) {
+	// availableMoves=new ArrayList<>();
+	// availableMoves.add(new Move(1));
+	// availableMoves.add(new Move(-1));
+	// availableMoves.add(new Move(2));
+	// availableMoves.add(new Move(-2));
+	// return;
+	// }
+	// for (Node i : me.getNeighbors()) {
+	// if(i.getR()==me.getR()) {//significa che può spostarsi destra/sinistra
+	// //se sono rosso e il mio vicino ha +1 c allora posso andare a sinistra
+	// availableMoves.add(new Move((i.getC()-me.getC())*2));//simple calcus credo
+	// che sta cosa funzioni indipendentemente da rosso blu boh magari funziona
+	//
+	// }
+	// if(i.getC()==me.getC()) {
+	// availableMoves.add(new Move((i.getR()-me.getR())));
+	// }
+	// }
+	//
+	// }
+
+	public void scegliRandom(/*
+								 * in teoria gli dovrei passare le availablemoves ma per ora siamo nella stessa
+								 * classe
+								 */) {
+		// Random random=new Random();
+		// availableMoves.get(random.nextInt(availableMoves.size())).updatePlayerMovement(board,
+		// me);
+	}
+
+	public void enemyWall(int ind) {
+		// se nemico piazza muro devo togliere alcuni neighbor e togliere alcune
+		// posizioni di muri
+
+	}
 
 	public void initBoard() {
 
@@ -116,6 +121,20 @@ public class ScaringellaPlayer implements Player {
 		return null;
 	}
 
+	private int[] randomMove() {
+
+		int[] move = new int[2];
+		move[0] = ThreadLocalRandom.current().nextInt(2);
+
+		if (move[0] == 0) {
+			move[1] = ThreadLocalRandom.current().nextInt(4);
+		} else {
+			move[1] = ThreadLocalRandom.current().nextInt(128);
+		}
+
+		return move;
+	}
+
 	@Override
 	public void start(boolean arg0) {
 
@@ -126,7 +145,7 @@ public class ScaringellaPlayer implements Player {
 		me = (red) ? board[0][4] : board[8][4];
 		enemy = (red) ? board[8][4] : board[0][4];
 
-		aviableWall = 10;
+		availableWall = 10;
 		walls = new HashSet<>();
 		// primo=rosso sopra
 		// game = new Field();
@@ -139,9 +158,11 @@ public class ScaringellaPlayer implements Player {
 	public void tellMove(int[] arg0) {
 
 		if (arg0[0] == 0) {
-
+			enemy = movePlayer(enemy, arg0[1]);
 		} else {
 			walls.add(arg0[1]);
+			walls.addAll(Wall.incompatible(arg0[1]));
+			fracture(arg0[1]);
 		}
 		// // ci dice che mossa ha fatto player nemico con stessi modi
 		// if (arg0[0] == 1) {
@@ -155,6 +176,25 @@ public class ScaringellaPlayer implements Player {
 		// game.updateAvailableMoves(game.getR(), game.getC());
 		// // game.printField();
 		// }
+	}
+
+	private Node movePlayer(Node start, int direction) {
+		int[] directions = (red) ? allDirection[1] : allDirection[0];
+		int newR = start.getR(), newC = start.getC();
+		if (direction < 2) {
+			newR += directions[direction];
+		} else {
+			newC += directions[direction];
+		}
+		return board[newR][newC];
+	}
+
+	private void fracture(int wall) {
+		Node[][] nodes = Wall.fracture(board, wall);
+		for (int i = 0; i < 2; i++) {
+			nodes[i][0].removeNeighbor(nodes[i][1]);
+			nodes[i][1].removeNeighbor(nodes[i][0]);
+		}
 	}
 
 }

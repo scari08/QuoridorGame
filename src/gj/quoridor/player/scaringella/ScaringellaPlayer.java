@@ -118,7 +118,40 @@ public class ScaringellaPlayer implements Player {
 		// game.playerMovement(n[1]);
 		// game.updateAvailableMoves(game.getR(), game.getC());
 		// game.printField();
+		int[] mossaTemp=randomMove();
+		while(!checkLegalMove(mossaTemp)) {
+			mossaTemp=randomMove();
+		}
+		movePlayer(me, mossaTemp[1]);
+		
 		return null;
+	}
+	
+	private boolean checkLegalMove(int[] move) {
+		
+		if(move[0]==0)return checkLegalMovement(me, move[1]);
+		if(move[0]==1)return checkLegalWallPlacement(move[1]);
+		return false;
+	}
+
+	private boolean checkLegalMovement(Node start, int direction) {
+		int[] directions = (red) ? allDirection[1] : allDirection[0];
+		int newR = start.getR(), newC = start.getC();
+		if (direction < 2) {
+			newR += directions[direction];
+		} else {
+			newC += directions[direction];
+		}
+		// TODO Auto-generated method stub
+		for (Node i : start.getNeighbors()) {
+			if(i.getC()==newC&&i.getR()==newR)return true;
+		}
+		return false;
+	}
+
+	private boolean checkLegalWallPlacement(int i) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	private int[] randomMove() {

@@ -20,6 +20,16 @@ public class Node {
 	public void removeNeighbor(Node n){
 		neighbors.remove(n);
 	}
+	
+	public boolean isNeighbor(Node n){
+		
+		for (Node node : neighbors) {
+			if(n.equals(node)==true)return true;
+		}
+		return false;
+		//return neighbors.stream().anyMatch(i->this.equals(n));
+		
+	}
 
 	@Override
 	public boolean equals(Object obj) {

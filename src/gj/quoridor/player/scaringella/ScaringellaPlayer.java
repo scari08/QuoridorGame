@@ -63,8 +63,10 @@ public class ScaringellaPlayer implements Player {
 	public void enemyWall(int ind) {
 		// se nemico piazza muro devo togliere alcuni neighbor e togliere alcune
 		// posizioni di muri
-
-	}
+		walls.add(ind);
+		walls.addAll(Wall.incompatible(ind));
+		fracture(ind);
+		}
 
 	public void initBoard() {
 
@@ -135,22 +137,16 @@ public class ScaringellaPlayer implements Player {
 	}
 
 	private boolean checkLegalMovement(Node start, int direction) {
-		int[] directions = (red) ? allDirection[1] : allDirection[0];
-		int newR = start.getR(), newC = start.getC();
-		if (direction < 2) {
-			newR += directions[direction];
-		} else {
-			newC += directions[direction];
-		}
-		// TODO Auto-generated method stub
-		for (Node i : start.getNeighbors()) {
-			if(i.getC()==newC&&i.getR()==newR)return true;
-		}
-		return false;
+		
+		return start.isNeighbor(movePlayer(start, direction));
 	}
 
 	private boolean checkLegalWallPlacement(int i) {
 		// TODO Auto-generated method stub
+		//metto muro controllando che sia compatible e che non blocchi l'avversario
+		//si potrebbe controllare tutti i neighbor dei neighbor dei player dopo aver piazzato i muri
+		//ed entrambi devono raggiungere i rispettivi goal (riga 0 per il blu e riga 8 per il rosso)
+		//oppure ricerca in profondità dal player al goal
 		return false;
 	}
 
@@ -180,7 +176,7 @@ public class ScaringellaPlayer implements Player {
 
 		availableWall = 10;
 		walls = new HashSet<>();
-		// primo=rosso sopra
+		// primo = rosso sopra
 		// game = new Field();
 		// game.setFirst(arg0);
 		// game.printField();
@@ -193,9 +189,7 @@ public class ScaringellaPlayer implements Player {
 		if (arg0[0] == 0) {
 			enemy = movePlayer(enemy, arg0[1]);
 		} else {
-			walls.add(arg0[1]);
-			walls.addAll(Wall.incompatible(arg0[1]));
-			fracture(arg0[1]);
+			enemyWall(arg0[1]);
 		}
 		// // ci dice che mossa ha fatto player nemico con stessi modi
 		// if (arg0[0] == 1) {

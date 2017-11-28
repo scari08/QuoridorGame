@@ -51,22 +51,13 @@ public class ScaringellaPlayer implements Player {
 	//
 	// }
 
-	public void scegliRandom(/*
-								 * in teoria gli dovrei passare le availablemoves ma per ora siamo nella stessa
-								 * classe
-								 */) {
-		// Random random=new Random();
-		// availableMoves.get(random.nextInt(availableMoves.size())).updatePlayerMovement(board,
-		// me);
-	}
-
 	public void enemyWall(int ind) {
 		// se nemico piazza muro devo togliere alcuni neighbor e togliere alcune
 		// posizioni di muri
 		walls.add(ind);
 		walls.addAll(Wall.incompatible(ind));
 		fracture(ind);
-		}
+	}
 
 	public void initBoard() {
 
@@ -120,34 +111,45 @@ public class ScaringellaPlayer implements Player {
 		// game.playerMovement(n[1]);
 		// game.updateAvailableMoves(game.getR(), game.getC());
 		// game.printField();
-		int[] mossaTemp=randomMove();
-		while(!checkLegalMove(mossaTemp)) {
-			mossaTemp=randomMove();
-		}
-		movePlayer(me, mossaTemp[1]);
-		
-		return null;
+		int[] mossaTemp = null;
+		do {
+			mossaTemp = randomMove();
+		} while (!checkLegalMove(mossaTemp));
+
+		me = movePlayer(me, mossaTemp[1], true);
+
+		return mossaTemp;
 	}
-	
+
 	private boolean checkLegalMove(int[] move) {
-		
-		if(move[0]==0)return checkLegalMovement(me, move[1]);
-		if(move[0]==1)return checkLegalWallPlacement(move[1]);
+
+		if (move[0] == 0)
+			return checkLegalMovement(me, move[1]);
+		if (move[0] == 1)
+			return checkLegalWallPlacement(move[1]);
 		return false;
 	}
 
 	private boolean checkLegalMovement(Node start, int direction) {
-		
-		return start.isNeighbor(movePlayer(start, direction));
+
+		try {
+			return start.isNeighbor(movePlayer(start, direction, true));
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// e.printStackTrace(); // TEMPORARY
+			return false;
+		}
+
 	}
 
 	private boolean checkLegalWallPlacement(int i) {
-		// TODO Auto-generated method stub
-		//metto muro controllando che sia compatible e che non blocchi l'avversario
-		//si potrebbe controllare tutti i neighbor dei neighbor dei player dopo aver piazzato i muri
-		//ed entrambi devono raggiungere i rispettivi goal (riga 0 per il blu e riga 8 per il rosso)
-		//oppure ricerca in profondità dal player al goal
-		return false;
+		if (availableWall == 0) {
+			return false;
+		} else if (walls.contains(i)) {
+			return false;
+		} else if ((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me, (red) ? 8 : 0) == null)) {
+			return false;
+		}
+		return true;
 	}
 
 	private int[] randomMove() {
@@ -187,7 +189,7 @@ public class ScaringellaPlayer implements Player {
 	public void tellMove(int[] arg0) {
 
 		if (arg0[0] == 0) {
-			enemy = movePlayer(enemy, arg0[1]);
+			enemy = movePlayer(enemy, arg0[1], false);
 		} else {
 			enemyWall(arg0[1]);
 		}
@@ -205,8 +207,8 @@ public class ScaringellaPlayer implements Player {
 		// }
 	}
 
-	private Node movePlayer(Node start, int direction) {
-		int[] directions = (red) ? allDirection[1] : allDirection[0];
+	private Node movePlayer(Node start, int direction, boolean myMovement) {
+		int[] directions = (red ^ myMovement) ? allDirection[1] : allDirection[0];
 		int newR = start.getR(), newC = start.getC();
 		if (direction < 2) {
 			newR += directions[direction];

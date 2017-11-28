@@ -22,13 +22,7 @@ public class Node {
 	}
 	
 	public boolean isNeighbor(Node n){
-		
-		for (Node node : neighbors) {
-			if(n.equals(node)==true)return true;
-		}
-		return false;
-		//return neighbors.stream().anyMatch(i->this.equals(n));
-		
+		return neighbors.stream().anyMatch(i->this.equals(n));
 	}
 
 	@Override

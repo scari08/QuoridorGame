@@ -80,7 +80,8 @@ public class Path {
 				result[i][k] = false;
 			}
 		}
-		return null;
+		return result;
 	}
 
 }
+ 

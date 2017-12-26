@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import gj.quoridor.player.Player;
 
@@ -136,8 +137,9 @@ public class ScaringellaPlayer implements Player {
 
 		if (move[0] == 0)
 			return checkLegalMovement(me, move[1]);
-		if (move[0] == 1)
+		if (move[0] == 1) {
 			return checkLegalWallPlacement(move[1]);
+		}
 		return false;
 	}
 
@@ -152,20 +154,20 @@ public class ScaringellaPlayer implements Player {
 
 	}
 
-	private boolean checkLegalWallPlacement(int i) {
-		if (availableWall == 0) {
+	private boolean checkLegalWallPlacement(int i) {		
+		if(availableWall==0) {
 			return false;
-		} else if (walls.contains(i)) {
-			return false;//due errori uno è l'availablewalls e l'altro è che prima devo piazzare il mur e poi cercare il path
-		} else if ((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me, (red) ? 8 : 0) == null)) {
-//			ArrayList<Node> cose = (ArrayList<Node>) Path.shortPath(enemy, (red) ? 0 : 8);
-//
-//			System.out.println("R=" + cose.get(0).getR() + " C=" + cose.get(0).getC());
-//			System.out.println("R=" + cose.get(1).getR() + " C=" + cose.get(1).getC());
-//			
+		}
+		if(walls.contains(i)) {
+			return false;
+		}
+		fracture(i);
+		if((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me, (red) ? 8 : 0) == null)) {
+			parolaProvvisorio(i);
 			return false;
 		}
 		return true;
+		
 	}
 
 	private int[] randomMove() {
@@ -239,6 +241,14 @@ public class ScaringellaPlayer implements Player {
 		for (int i = 0; i < 2; i++) {
 			nodes[i][0].removeNeighbor(nodes[i][1]);
 			nodes[i][1].removeNeighbor(nodes[i][0]);
+		}
+	}
+	
+	private void parolaProvvisorio(int wall) {
+		Node[][] nodes = Wall.fracture(board, wall);
+		for (int i = 0; i < 2; i++) {
+			nodes[i][0].addNeighbor(nodes[i][1]);
+			nodes[i][1].addNeighbor(nodes[i][0]);
 		}
 	}
 

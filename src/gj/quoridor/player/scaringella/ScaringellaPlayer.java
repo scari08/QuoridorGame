@@ -1,15 +1,12 @@
 package gj.quoridor.player.scaringella;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 
 import gj.quoridor.player.Player;
 
 public class ScaringellaPlayer implements Player {
-	// Field game;
 
 	private Node[][] board = new Node[9][9];
 
@@ -22,43 +19,15 @@ public class ScaringellaPlayer implements Player {
 	private int availableWall;
 	private Set<Integer> walls;
 
-	// private List<Move> moves;
-	// private List<Move> availableMoves;
+	@Override
+	public void start(boolean arg0) {
+		initBoard();
+		red = arg0;
+		me = (red) ? board[0][4] : board[8][4];
+		enemy = (red) ? board[8][4] : board[0][4];
 
-	// public void updateAvailableMoves() {
-	//
-	//
-	// //da implementare il controllo che non faccia spostamenti sbagliati
-	// //a dire il vero ora basta che me segua i neighbor
-	//
-	// if(me.getNeighbors().size()==4) {
-	// availableMoves=new ArrayList<>();
-	// availableMoves.add(new Move(1));
-	// availableMoves.add(new Move(-1));
-	// availableMoves.add(new Move(2));
-	// availableMoves.add(new Move(-2));
-	// return;
-	// }
-	// for (Node i : me.getNeighbors()) {
-	// if(i.getR()==me.getR()) {//significa che può spostarsi destra/sinistra
-	// //se sono rosso e il mio vicino ha +1 c allora posso andare a sinistra
-	// availableMoves.add(new Move((i.getC()-me.getC())*2));//simple calcus credo
-	// che sta cosa funzioni indipendentemente da rosso blu boh magari funziona
-	//
-	// }
-	// if(i.getC()==me.getC()) {
-	// availableMoves.add(new Move((i.getR()-me.getR())));
-	// }
-	// }
-	//
-	// }
-
-	public void enemyWall(int ind) {
-		// se nemico piazza muro devo togliere alcuni neighbor e togliere alcune
-		// posizioni di muri
-		walls.add(ind);
-		walls.addAll(Wall.incompatible(ind));
-		fracture(ind);
+		availableWall = 10;
+		walls = new HashSet<>();
 	}
 
 	public void initBoard() {
@@ -92,82 +61,21 @@ public class ScaringellaPlayer implements Player {
 
 	}
 
-	public ScaringellaPlayer() {
-		// TODO Auto-generated constructor stub
-	}
-
-	// all inizio costruisci il campo di gioco con il metodo start
-
 	@Override
 	public int[] move() {
 
-		// array di 2 valori
-		// il primo valore se 0 muove in avanti 0
-		// indietro 1 sinistra 2 destra 3 (relativo)
-		// se primo valore=1 metti un muro nell indice= secondo valore max 127
-		// int n[] = new int[2];
-		//
-		// n[0] = 0;
-		// n[1] = game.chooseMovement();
-		//
-		// game.playerMovement(n[1]);
-		// game.updateAvailableMoves(game.getR(), game.getC());
-		// game.printField();
 		int[] mossaTemp = null;
 		do {
 			mossaTemp = randomMove();
 		} while (!checkLegalMove(mossaTemp));
-		
-		if(mossaTemp[0]==0){
+
+		if (mossaTemp[0] == 0) {
 			me = movePlayer(me, mossaTemp[1], true);
-		}
-		else if(mossaTemp[0]==1){
-			enemyWall(mossaTemp[1]);
+		} else if (mossaTemp[0] == 1) {
+			placeWall(mossaTemp[1]);
 			availableWall--;
 		}
-
-		/////////attenzione!!!!
-		//me = movePlayer(me, mossaTemp[1], true);
-		
-
 		return mossaTemp;
-	}
-
-	private boolean checkLegalMove(int[] move) {
-
-		if (move[0] == 0)
-			return checkLegalMovement(me, move[1]);
-		if (move[0] == 1) {
-			return checkLegalWallPlacement(move[1]);
-		}
-		return false;
-	}
-
-	private boolean checkLegalMovement(Node start, int direction) {
-
-		try {
-			return start.isNeighbor(movePlayer(start, direction, true));
-		} catch (ArrayIndexOutOfBoundsException e) {
-			// e.printStackTrace(); // TEMPORARY
-			return false;
-		}
-
-	}
-
-	private boolean checkLegalWallPlacement(int i) {		
-		if(availableWall==0) {
-			return false;
-		}
-		if(walls.contains(i)) {
-			return false;
-		}
-		fracture(i);
-		if((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me, (red) ? 8 : 0) == null)) {
-			parolaProvvisorio(i);
-			return false;
-		}
-		return true;
-		
 	}
 
 	private int[] randomMove() {
@@ -184,23 +92,45 @@ public class ScaringellaPlayer implements Player {
 		return move;
 	}
 
-	@Override
-	public void start(boolean arg0) {
+	private boolean checkLegalMove(int[] move) {
 
-		initBoard();
+		if (move[0] == 0)
+			return checkLegalMovement(me, move[1]);
+		if (move[0] == 1) {
+			return checkLegalWallPlacement(move[1]);
+		}
+		return false;
+	}
 
-		red = arg0;
+	private boolean checkLegalMovement(Node start, int direction) {
+		try {
+			return start.isNeighbor(movePlayer(start, direction, true));
+		} catch (ArrayIndexOutOfBoundsException e) {
+			return false;
+		}
+	}
 
-		me = (red) ? board[0][4] : board[8][4];
-		enemy = (red) ? board[8][4] : board[0][4];
+	private boolean checkLegalWallPlacement(int i) {
+		if (availableWall == 0) {
+			return false;
+		}
+		if (walls.contains(i)) {
+			return false;
+		}
+		fracture(i);
+		if ((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me, (red) ? 8 : 0) == null)) {
+			patch(i);
+			return false;
+		}
+		patch(i);
+		return true;
+	
+	}
 
-		availableWall = 10;
-		walls = new HashSet<>();
-		// primo = rosso sopra
-		// game = new Field();
-		// game.setFirst(arg0);
-		// game.printField();
-
+	public void placeWall(int ind) {
+		walls.add(ind);
+		walls.addAll(Wall.incompatible(ind));
+		fracture(ind);
 	}
 
 	@Override
@@ -209,20 +139,8 @@ public class ScaringellaPlayer implements Player {
 		if (arg0[0] == 0) {
 			enemy = movePlayer(enemy, arg0[1], false);
 		} else {
-			enemyWall(arg0[1]);
+			placeWall(arg0[1]);
 		}
-		// // ci dice che mossa ha fatto player nemico con stessi modi
-		// if (arg0[0] == 1) {
-		// if (game.getFirst()) {
-		// game.placedWall(arg0[1]);
-		// game.updateAvailableMoves(game.getR(), game.getC());
-		// // game.printField();
-		// return;
-		// }
-		// game.placedWall(game.convertIndexWall(arg0[1]));
-		// game.updateAvailableMoves(game.getR(), game.getC());
-		// // game.printField();
-		// }
 	}
 
 	private Node movePlayer(Node start, int direction, boolean myMovement) {
@@ -243,8 +161,8 @@ public class ScaringellaPlayer implements Player {
 			nodes[i][1].removeNeighbor(nodes[i][0]);
 		}
 	}
-	
-	private void parolaProvvisorio(int wall) {
+
+	private void patch(int wall) {
 		Node[][] nodes = Wall.fracture(board, wall);
 		for (int i = 0; i < 2; i++) {
 			nodes[i][0].addNeighbor(nodes[i][1]);

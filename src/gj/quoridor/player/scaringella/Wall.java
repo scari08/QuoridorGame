@@ -23,14 +23,6 @@ public class Wall {
 		}
 
 		result.removeIf(w -> w < 0 || w > 127);
-
-		// result.removeIf(new Predicate<Integer>() {
-		// @Override
-		// public boolean test(Integer i) {
-		// return i < 0 || i > 127;
-		// }
-		// });
-
 		return result;
 	}
 

@@ -23,7 +23,6 @@ public class Node {
 	
 	public boolean isNeighbor(Node n){
 		return neighbors.contains(n);
-		//return neighbors.stream().anyMatch(i->this.equals(n));
 	}
 
 	@Override
@@ -57,12 +56,6 @@ public class Node {
 
 	public int getC() {
 		return c;
-	}
-	
-	public void stampaprovvisorio(ArrayList <Node> cose){
-		System.out.println("R=" + cose.get(0).getR() + " C=" + cose.get(0).getC());
-		System.out.println("R=" + cose.get(1).getR() + " C=" + cose.get(1).getC());
-		
 	}
 
 }

@@ -1,6 +1,7 @@
 package gj.quoridor.player.scaringella;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,9 +13,11 @@ public class ScaringellaPlayer implements Player {
 
 	private Node me;
 	private Node enemy;
+	private int myRemaining;
+	private int enemyRemaining;
 	private boolean red;
 
-	private int[][] allDirection = new int[][] { { 1, -1, 1, -1 }, { -1, 1, -1, 1 } }; // il primo array è il rosso
+	private int[][] allDirections = new int[][] { { 1, -1, 1, -1 }, { -1, 1, -1, 1 } }; // il primo array è il rosso
 
 	private int availableWall;
 	private Set<Integer> walls;
@@ -64,10 +67,25 @@ public class ScaringellaPlayer implements Player {
 	@Override
 	public int[] move() {
 
-		int[] mossaTemp = null;
-		do {
-			mossaTemp = randomMove();
-		} while (!checkLegalMove(mossaTemp));
+		int[] mossaTemp = new int[2];
+//		do {
+//			mossaTemp = randomMove();
+//
+//			mossaTemp[0] = 0;
+//			mossaTemp[1] = shortMovement();
+//
+//		} while (!checkLegalMove(mossaTemp));
+
+		myRemaining = Path.shortPath(me, (red) ? 8 : 0).size();
+		enemyRemaining = Path.shortPath(enemy, (red) ? 0 : 8).size();
+		if (myRemaining > enemyRemaining) {// piazzo muro per allungargli il percorso
+			mossaTemp[0] = 1;
+			mossaTemp[1] = lengthenPath();
+			
+		} else {
+			mossaTemp[0] = 0;
+			mossaTemp[1] = shortMovement();
+		}while(!checkLegalMove(mossaTemp)) {mossaTemp=randomMove();} ////////ATTENZZZZZIONEE
 
 		if (mossaTemp[0] == 0) {
 			me = movePlayer(me, mossaTemp[1], true);
@@ -76,6 +94,23 @@ public class ScaringellaPlayer implements Player {
 			availableWall--;
 		}
 		return mossaTemp;
+	}
+
+	private int lengthenPath() {
+		int remaining = enemyRemaining;
+		int highest = 0;
+		for (int i = 0; i < 128; i++) {
+			if (checkLegalWallPlacement(i)) {
+				fracture(i);
+				int temp = Path.shortPath(enemy, (red) ? 0 : 8).size();
+				if (temp > remaining) {
+					remaining = temp;
+					highest = i;
+				}
+				patch(i);
+			}
+		}
+		return highest;
 	}
 
 	private int[] randomMove() {
@@ -124,7 +159,7 @@ public class ScaringellaPlayer implements Player {
 		}
 		patch(i);
 		return true;
-	
+
 	}
 
 	public void placeWall(int ind) {
@@ -144,7 +179,7 @@ public class ScaringellaPlayer implements Player {
 	}
 
 	private Node movePlayer(Node start, int direction, boolean myMovement) {
-		int[] directions = (red ^ myMovement) ? allDirection[1] : allDirection[0];
+		int[] directions = (red ^ myMovement) ? allDirections[1] : allDirections[0];
 		int newR = start.getR(), newC = start.getC();
 		if (direction < 2) {
 			newR += directions[direction];
@@ -168,6 +203,28 @@ public class ScaringellaPlayer implements Player {
 			nodes[i][0].addNeighbor(nodes[i][1]);
 			nodes[i][1].addNeighbor(nodes[i][0]);
 		}
+	}
+
+	private int shortMovement() {
+		List<Node> path = Path.shortPath(me, (red) ? 8 : 0);
+
+		return directMovement(path.get(path.size()-1), path.get(path.size()-2));
+	}
+
+	private int directMovement(Node start, Node goal) {
+		int[] directions = (red) ? allDirections[0] : allDirections[1];
+		for (int i = 0; i < 4; i++) {
+			if (i < 2) {
+				int temp = start.getR() + directions[i];
+				if (temp == goal.getR())
+					return i;
+			} else {
+				int temp = start.getC() + directions[i];
+				if (temp == goal.getC())
+					return i;
+			}
+		}
+		return 0;
 	}
 
 }

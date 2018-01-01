@@ -80,12 +80,12 @@ public class ScaringellaPlayer implements Player {
 		enemyRemaining = Path.shortPath(enemy, (red) ? 0 : 8).size();
 		if (myRemaining > enemyRemaining) {// piazzo muro per allungargli il percorso
 			mossaTemp[0] = 1;
-			mossaTemp[1] = lengthenPath();
+			mossaTemp[1] = minMaxLengthen();
 			
 		} else {
 			mossaTemp[0] = 0;
 			mossaTemp[1] = shortMovement();
-		}while(!checkLegalMove(mossaTemp)) {mossaTemp=randomMove();} ////////ATTENZZZZZIONEE
+		}while(!checkLegalMove(mossaTemp)) {mossaTemp[0]=0;mossaTemp[1]=shortMovement();} ////////ATTENZZZZZIONEE
 
 		if (mossaTemp[0] == 0) {
 			me = movePlayer(me, mossaTemp[1], true);
@@ -111,6 +111,24 @@ public class ScaringellaPlayer implements Player {
 			}
 		}
 		return highest;
+	}
+	
+	private int minMaxLengthen() {
+		int bestInd = 0;
+		int best= enemyRemaining-myRemaining;
+		for(int i=0; i<128;i++) {
+			if(checkLegalWallPlacement(i)) {
+				fracture(i);
+				int temp1=Path.shortPath(me, (red)? 8: 0 ).size();
+				int temp2=Path.shortPath(enemy, (red) ? 0 : 8).size();
+				if (temp2-temp1>best) {
+					best=temp2-temp1;
+					bestInd=i;
+				}
+				patch(i);
+			}
+		}
+		return bestInd;
 	}
 
 	private int[] randomMove() {

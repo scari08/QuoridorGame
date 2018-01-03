@@ -66,19 +66,19 @@ public class ScaringellaPlayer implements Player {
 
 		int[] move = new int[2];
 
-		int myRemaining = Path.shortPath(me, (red) ? 8 : 0).size();
-		int enemyRemaining = Path.shortPath(enemy, (red) ? 0 : 8).size();
-		if (myRemaining > enemyRemaining) {
+		List<Node> myRemaining = Path.shortPath(me, (red) ? 8 : 0);
+		List<Node> enemyRemaining = Path.shortPath(enemy, (red) ? 0 : 8);
+		if (myRemaining.size() > enemyRemaining.size()) {
 			move[0] = 1;
-			move[1] = minMaxLengthen(myRemaining, enemyRemaining);
+			move[1] = minMaxLengthen(myRemaining.size(), enemyRemaining.size());
 
 		} else {
 			move[0] = 0;
-			move[1] = shortMovement();
+			move[1] = shortMovement(myRemaining);
 		}
 		if (!checkLegalMove(move)) {
 			move[0] = 0;
-			move[1] = shortMovement();
+			move[1] = shortMovement(myRemaining);
 		} //////// ATTENZZZZZIONEE
 
 		if (move[0] == 0) {

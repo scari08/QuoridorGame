@@ -40,11 +40,6 @@ public class Node {
 			return false;
 		return true;
 	}
-	
-	public void linkNode(int r, int c) {
-		Node e= new Node(r,c);
-		this.neighbors.add(e);
-	}
 
 	public ArrayList<Node> getNeighbors() {
 		return neighbors;

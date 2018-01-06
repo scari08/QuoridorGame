@@ -30,7 +30,7 @@ public class ScaringellaPlayer implements Player {
 		walls = new HashSet<>();
 	}
 
-	public void initBoard() {
+	private void initBoard() {
 
 		for (int i = 0; i < 9; i++) {
 			for (int k = 0; k < 9; k++) {
@@ -81,11 +81,6 @@ public class ScaringellaPlayer implements Player {
 			move[1] = shortMovement(myRemaining);
 		}
 
-		// if (!checkLegalMove(move)) {
-		// move[0] = 0;
-		// move[1] = shortMovement(myRemaining);
-		// } //////// ATTENZZZZZIONEE
-
 		if (move[0] == 0) {
 			me = movePlayer(me, move[1], true);
 		} else if (move[0] == 1) {
@@ -95,9 +90,28 @@ public class ScaringellaPlayer implements Player {
 		return move;
 	}
 
-	private int minMaxLengthen(int delta) {
+	private int shortMovement(List<Node> path) {
+		return directMovement(path.get(path.size() - 1), path.get(path.size() - 2));
+	}
+
+	private int directMovement(Node start, Node goal) {
+		int[] directions = (red) ? allDirections[0] : allDirections[1];
+		for (int i = 0; i < 4; i++) {
+			if (i < 2) {
+				int temp = start.getR() + directions[i];
+				if (temp == goal.getR())
+					return i;
+			} else {
+				int temp = start.getC() + directions[i];
+				if (temp == goal.getC())
+					return i;
+			}
+		}
+		return 0;
+	}
+
+	private int minMaxLengthen(int best) {
 		int bestInd = -1;
-		int best = delta;
 		for (int i = 0; i < 128; i++) {
 			if (!walls.contains(i)) {
 				fracture(i);
@@ -111,48 +125,13 @@ public class ScaringellaPlayer implements Player {
 						bestInd = i;
 					}
 				}
+				patch(i);
 			}
-			patch(i);
 		}
 		return bestInd;
 	}
 
-	// private boolean checkLegalMove(int[] move) {
-	// boolean result = false;
-	// if (move[0] == 0)
-	// result = checkLegalMovement(me, move[1]);
-	// if (move[0] == 1) {
-	// result = checkLegalWallPlacement(move[1]);
-	// }
-	// return result;
-	// }
-	//
-	// private boolean checkLegalMovement(Node start, int direction) {
-	// try {
-	// return start.isNeighbor(movePlayer(start, direction, true));
-	// } catch (ArrayIndexOutOfBoundsException e) {
-	// return false;
-	// }
-	// }
-	//
-	// private boolean checkLegalWallPlacement(int i) {
-	// if (availableWall == 0) {
-	// return false;
-	// }
-	// if (walls.contains(i)) {
-	// return false;
-	// }
-	// fracture(i);
-	// if ((Path.shortPath(enemy, (red) ? 0 : 8) == null) || (Path.shortPath(me,
-	// (red) ? 8 : 0) == null)) {
-	// patch(i);
-	// return false;
-	// }
-	// patch(i);
-	// return true;
-	// }
-
-	public void placeWall(int ind) {
+	private void placeWall(int ind) {
 		walls.add(ind);
 		walls.addAll(Wall.incompatible(ind));
 		fracture(ind);
@@ -193,26 +172,6 @@ public class ScaringellaPlayer implements Player {
 			nodes[i][0].addNeighbor(nodes[i][1]);
 			nodes[i][1].addNeighbor(nodes[i][0]);
 		}
-	}
-
-	private int shortMovement(List<Node> path) {
-		return directMovement(path.get(path.size() - 1), path.get(path.size() - 2));
-	}
-
-	private int directMovement(Node start, Node goal) {
-		int[] directions = (red) ? allDirections[0] : allDirections[1];
-		for (int i = 0; i < 4; i++) {
-			if (i < 2) {
-				int temp = start.getR() + directions[i];
-				if (temp == goal.getR())
-					return i;
-			} else {
-				int temp = start.getC() + directions[i];
-				if (temp == goal.getC())
-					return i;
-			}
-		}
-		return 0;
 	}
 
 }

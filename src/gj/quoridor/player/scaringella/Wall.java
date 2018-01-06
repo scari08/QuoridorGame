@@ -7,18 +7,22 @@ public class Wall {
 
 	public static List<Integer> incompatible(int wall) {
 		List<Integer> result = new LinkedList<>();
-		
+
 		int c = wall % 16;
 		// verticale
-			if (c < 8) {
-				result.add(wall + 8);
-				result.add(wall - 16);
+		if (c < 8) {
+			result.add(wall + 8);
+			if (wall < 112)
 				result.add(wall + 16);
-			} else { // orizzontale
-				result.add(wall - 8);
+			if (wall > 7)
+				result.add(wall - 16);
+		} else { // orizzontale
+			result.add(wall - 8);
+			if (wall % 8 < 7)
 				result.add(wall + 1);
+			if (wall % 8 > 0)
 				result.add(wall - 1);
-			}
+		}
 
 		result.removeIf(w -> w < 0 || w > 127);
 		return result;

@@ -3,25 +3,25 @@ package gj.quoridor.player.scaringella;
 import java.util.ArrayList;
 
 public class Node {
-	
-	private final int r,c;
+
+	private final int r, c;
 	private ArrayList<Node> neighbors;
-	
-	public Node(int r,int c) {
-		this.r=r;
-		this.c=c;
-		neighbors=new ArrayList<>();		
+
+	public Node(int r, int c) {
+		this.r = r;
+		this.c = c;
+		neighbors = new ArrayList<>();
 	}
-	
+
 	public void addNeighbor(Node n) {
 		neighbors.add(n);
 	}
-	
-	public void removeNeighbor(Node n){
+
+	public void removeNeighbor(Node n) {
 		neighbors.remove(n);
 	}
-	
-	public boolean isNeighbor(Node n){
+
+	public boolean isNeighbor(Node n) {
 		return neighbors.contains(n);
 	}
 
